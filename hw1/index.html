@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WEB-backend Task 1</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            text-align: center;
+            margin-top: 50px;
+            color: #333;
+        }
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-gap: 20px;
+            max-width: 1200px;
+            margin: 50px auto;
+        }
+        .gallery img {
+            width: 100%;
+        }
+        .gallery .caption {
+            text-align: center;
+            margin-top: 10px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+<h1>WEB-backend Task 1</h1>
+<div class="gallery">
+    <div>
+        <img src="resorces/ping kubsu.ru.png" alt="Screenshot 1">
+        <p class="caption">2</p>
+    </div>
+    <div>
+        <img src="resorces/nslookup -type=a kubsu.ru.png" alt="Screenshot 2">
+        <p class="caption">3 (kubsu.ru A-type)</p>
+    </div>
+    <div>
+        <img src="resorces/nslookup -type=mx kubsu.ru.png" alt="Screenshot 3">
+        <p class="caption">3 (kubsu.ru MX-type)</p>
+    </div>
+    <div>
+        <img src="resorces/nslookup -type=a kubsu-dev.ru.png" alt="Screenshot 4">
+        <p class="caption">3 (kubsu-dev.ru A-type)</p>
+    </div>
+    <div>
+        <img src="resorces/nslookup -type=mx kubsu-dev.ru.png" alt="Screenshot 5">
+        <p class="caption">3 (kubsu-dev.ru MX-type)</p>
+    </div>
+    <div>
+        <img src="resorces/whois kubsu.ru.png" alt="Screenshot 6">
+        <p class="caption">4 (kubsu.ru)</p>
+    </div>
+    <div>
+        <img src="resorces/whois kubsu-dev.ru.png" alt="Screenshot 7">
+        <p class="caption">4 (kubsu-dev.ru)</p>
+    </div>
+</div>
+</body>
+</html>
