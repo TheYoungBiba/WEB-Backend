@@ -1,0 +1,10 @@
+CREATE TABLE users (
+    id INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    phone VARCHAR(11) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    birthday BIGINT(20) NOT NULL,
+    gender VARCHAR(6) NOT NULL,
+    bio TEXT NOT NULL DEFAULT '',
+    PRIMARY KEY(id)
+);

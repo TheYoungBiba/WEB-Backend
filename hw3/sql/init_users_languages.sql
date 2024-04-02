@@ -1,0 +1,6 @@
+CREATE TABLE users_languages(
+    id INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+    user_id INT(10) UNSIGNED NOT NULL,
+    lang_id INT(10) UNSIGNED NOT NULL,
+    PRIMARY KEY (id)
+);
