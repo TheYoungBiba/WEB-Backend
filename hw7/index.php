@@ -2,19 +2,64 @@
 header('Content-Type: text/html; charset=UTF-8');
 session_start();
 
+if (strpos($_SERVER['REQUEST_URI'], 'index.php') === false) {
+    header('Location: index.php');
+    exit();
+}
+
 $log = !empty($_SESSION['login']);
 
-include('../DatabaseConnection.php');
+$db = new PDO(
+    'mysql:host=localhost;dbname=u67401',
+    'u67401',
+    '6728742',
+    [
+        PDO::ATTR_PERSISTENT => true,
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+    ]
+);
+
+function checkinput($str) {
+    return htmlspecialchars(strip_tags(trim($str)), ENT_QUOTES);
+}
+
+function checkSQL($str) {
+    return htmlspecialchars_decode($str, ENT_QUOTES);
+}
+
+
+$adminLog = isset($_SERVER['PHP_AUTH_USER']);
+$uid = isset($_SESSION['id']) ? $_SESSION['id'] : '';
+$getUid = isset($_GET['uid']) ? checkinput($_GET['uid']) : '';
+
+if ($adminLog && preg_match('/^[0-9]+$/', $getUid)) {
+    $uid = $getUid;
+    $log = true;
+}
 
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-    $name = (!empty($_COOKIE['name_err']) ? $_COOKIE['name_err'] : '');
-    $phone = (!empty($_COOKIE['phone_err']) ? $_COOKIE['phone_err'] : '');
-    $email = (!empty($_COOKIE['email_err']) ? $_COOKIE['email_err'] : '');
-    $birthday = (!empty($_COOKIE['birthday_err']) ? $_COOKIE['birthday_err'] : '');
-    $gender = (!empty($_COOKIE['gender_err']) ? $_COOKIE['gender_err'] : '');
-    $lang = (!empty($_COOKIE['lang_err']) ? $_COOKIE['lang_err'] : '');
-    $bio = (!empty($_COOKIE['bio_err']) ? $_COOKIE['bio_err'] : '');
-    $check_mark = (!empty($_COOKIE['check_mark_err']) ? $_COOKIE['check_mark_err'] : '');
+    if (($adminLog && !empty($getUid)) || !$adminLog) {
+        $cookAdmin = (!empty($_COOKIE['admin_value']) ? $_COOKIE['admin_value'] : '');
+        if ($cookAdmin == '1') {
+            setcookie('fio_value', '', time() - 30 * 24 * 60 * 60);
+            setcookie('number_value', '', time() - 30 * 24 * 60 * 60);
+            setcookie('email_value', '', time() - 30 * 24 * 60 * 60);
+            setcookie('date_value', '', time() - 30 * 24 * 60 * 60);
+            setcookie('radio_value', '', time() - 30 * 24 * 60 * 60);
+            setcookie('language_value', '', time() - 30 * 24 * 60 * 60);
+            setcookie('bio_value', '', time() - 30 * 24 * 60 * 60);
+            setcookie('check_value', '', time() - 30 * 24 * 60 * 60);
+        }
+    }
+    $csrf_error = isset($_COOKIE['csrf_error']) ? checkinput($_COOKIE['csrf_error']) : '';
+    $name = (!empty($_COOKIE['name_err']) ? checkinput($_COOKIE['name_err']) : '');
+    $phone = (!empty($_COOKIE['phone_err']) ? checkinput($_COOKIE['phone_err']) : '');
+    $email = (!empty($_COOKIE['email_err']) ? checkinput($_COOKIE['email_err']) : '');
+    $birthday = (!empty($_COOKIE['birthday_err']) ? checkinput($_COOKIE['birthday_err']) : '');
+    $gender = (!empty($_COOKIE['gender_err']) ? checkinput($_COOKIE['gender_err']) : '');
+    $lang = (!empty($_COOKIE['lang_err']) ? checkinput($_COOKIE['lang_err']) : '');
+    $bio = (!empty($_COOKIE['bio_err']) ? checkinput($_COOKIE['bio_err']) : '');
+    $check_mark = (!empty($_COOKIE['check_mark_err']) ? checkinput($_COOKIE['check_mark_err']) : '');
     $errs = array();
     $mess = array();
     $vals = array();
@@ -27,14 +72,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         }
         $errs[$enName] = !empty($_COOKIE[$enName . '_err']);
         $mess[$enName] = "<div class='messageError'>$val</div>";
-        $vals[$enName] = empty($_COOKIE[$enName . '_val']) ? '' : $_COOKIE[$enName . '_val'];
+        $vals[$enName] = empty($_COOKIE[$enName . '_val']) ? '' : checkinput($_COOKIE[$enName . '_val']);
         deleteCookies($enName);
     }
 
     function setValue($enName, $param){
         global $values;
-        $values[$enName] = empty($param) ? '' : strip_tags($param);
+        $values[$enName] = empty($param) ? '' : checkinput($param);
     }
+
+    if (isset($_COOKIE['csrf_error']))
+        setcookie('csrf_error', '', 100000);
 
     if (!empty($_COOKIE['save'])) {
         setcookie('save', '', 100000);
@@ -44,8 +92,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         if (!empty($_COOKIE['password'])) {
             $mess['info'] = sprintf(
                 'Вы можете <a href="login.php">войти</a> с логином <strong>%s</strong> и паролем <strong>%s</strong> для изменения данных.',
-                strip_tags($_COOKIE['login']),
-                strip_tags($_COOKIE['password'])
+                checkinput($_COOKIE['login']),
+                checkinput($_COOKIE['password'])
             );
         }
     }
@@ -81,8 +129,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             setValue('gender', $fet['gender']);
             setValue('lang', $lang);
             setValue('bio', $fet['bio']);
-            setValue('check_mark', $fet['check_mark']);
-//
+            setValue('check_mark', '1');
+
         } catch(PDOException $e) {
             print('Error : ' . $e -> getMessage());
             exit();
@@ -91,36 +139,46 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 
     include('form.php');
 } elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $name = (!empty($_POST['name']) ? $_POST['name'] : '');
-    $phone = (!empty($_POST['phone']) ? $_POST['phone'] : '');
-    $email = (!empty($_POST['email']) ? $_POST['email'] : '');
-    $birthday = (!empty($_POST['birthday']) ? $_POST['birthday'] : '');
-    $gender = (!empty($_POST['gender']) ? $_POST['gender'] : '');
-    $lang = (!empty($_POST['lang']) ? $_POST['lang'] : '[]');
-    $bio = (!empty($_POST['bio']) ? $_POST['bio'] : '');
-    $check_mark = (!empty($_POST['check_mark']) ? $_POST['check_mark'] : '');
+    $csrf_token = isset($_POST['csrf_token']) ? $_POST['csrf_token'] : '';
+    $name = (!empty($_POST['name']) ? checkinput($_POST['name']) : '');
+    $phone = (!empty($_POST['phone']) ? checkinput($_POST['phone']) : '');
+    $email = (!empty($_POST['email']) ? checkinput($_POST['email']) : '');
+    $birthday = (!empty($_POST['birthday']) ? checkinput($_POST['birthday']) : '');
+    $gender = (!empty($_POST['gender']) ? checkinput($_POST['gender']) : '');
+    $lang = (!empty($_POST['lang']) ? $_POST['lang'] : []);
+    $bio = (!empty($_POST['bio']) ? checkinput($_POST['bio']) : '');
+    $check_mark = (!empty($_POST['check_mark']) ? checkinput($_POST['check_mark']) : '');
+
+    if ($csrf_token != $_SESSION['csrf_token']) {
+        setcookie('csrf_token', '1');
+        header('Location: index.php' . (($getUid != NULL) ? '?uid=' . $uid : ''));
+        exit();
+    }
 
     if (isset($_POST['logout_form'])) {
-        deleteCookies('name', 1);
-        deleteCookies('phone', 1);
-        deleteCookies('email', 1);
-        deleteCookies('birthday', 1);
-        deleteCookies('gender', 1);
-        deleteCookies('lang', 1);
-        deleteCookies('bio', 1);
-        deleteCookies('check_mark', 1);
-        session_destroy();
-        header('Location: ./');
+        if ($adminLog && empty($_SESSION['login']))
+            header('Location: admin.php');
+        else {
+            deleteCookies('name', 1);
+            deleteCookies('phone', 1);
+            deleteCookies('email', 1);
+            deleteCookies('birthday', 1);
+            deleteCookies('gender', 1);
+            deleteCookies('lang', 1);
+            deleteCookies('bio', 1);
+            deleteCookies('check_mark', 1);
+            session_destroy();
+            header('Location: ./');
+        }
         exit();
     }
 
     $tempPhone = preg_replace('/\D/', '', $phone);
 
-    function emptyValue($cook, $comment, $usl)
-    {
+    function emptyValue($cook, $comment, $usl) {
         global $err;
         $res = false;
-        $setVal = $_POST[$cook];
+        $setVal = isset($_POST[$cook]) ? $_POST[$cook] : '';
         if ($usl) {
             setcookie($cook . '_err', $comment, time() + 24 * 60 * 60);
             $err = true;
@@ -211,6 +269,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $stmt1 = $db->prepare("INSERT INTO users_languages (user_id, lang_id) VALUES (?, ?)");
         foreach($languages as $row){
             $stmt1->execute([$_SESSION['id'], $row['id']]);
+            if ($adminLog) {
+                setcookie('admin_value', '1', time() + 30 * 24 * 60 * 60);
+            }
         }
     } else {
         $login = substr(uniqid(), 0, 4).rand(10, 100);
@@ -243,7 +304,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         setcookie('check_mark_val', $check_mark, time() + 24 * 60 * 60 * 365);
     }
     setcookie('save', '1');
-    header('Location: index.php');
+    header('Location: index.php' . (($getUid != NULL) ? '?uid=' . $uid : ''));
 }
 
 function deleteCookies($cook, $vals = 0) {

@@ -11,6 +11,8 @@
 
 <?php
 
+include('../DatabaseConnection.php');
+
 header('Content-Type: text/html; charset=UTF-8');
 
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
@@ -91,8 +93,8 @@ if ($errors != '') {
     printError($errors);
 }
 
-$db = new PDO('mysql:host=localhost;dbname=u67401', 'u67401', '6728742',
-    [PDO::ATTR_PERSISTENT => true, PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+//$db = new PDO('mysql:host=localhost;dbname=u67401', 'u67401', '6728742',
+//    [PDO::ATTR_PERSISTENT => true, PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
 
 $inQuery = implode(',', array_fill(0, count($lang), '?'));
 

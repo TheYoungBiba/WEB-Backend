@@ -111,7 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             setValue('gender', $fet['gender']);
             setValue('lang', $lang);
             setValue('bio', $fet['bio']);
-            setValue('check_mark', $fet['check_mark']);
+            setValue('check_mark', '1');
 
         } catch(PDOException $e) {
             print('Error : ' . $e -> getMessage());

@@ -10,10 +10,17 @@ if (!empty($_SESSION['login'])) {
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    include('../DatabaseConnection.php');
-
-    $login = $_POST['login'];
-    $password = md5($_POST['password']);
+    $db = new PDO(
+        'mysql:host=localhost;dbname=u67401',
+        'u67401',
+        '6728742',
+        [
+            PDO::ATTR_PERSISTENT => true,
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+        ]
+    );
+    $login = checkinput($_POST['login']);
+    $password = md5(checkinput($_POST['password']));
     try {
         $stmt = $db -> prepare("SELECT id FROM verified_users WHERE login = ? and password = ?");
         $stmt -> execute([$login, $password]);

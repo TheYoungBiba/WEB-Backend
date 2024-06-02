@@ -1,11 +1,7 @@
 <?php
 header('Content-Type: text/html; charset=UTF-8');
 
-$db = new PDO(
-    [
-        PDO::ATTR_PERSISTENT => true,
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
-    ]);
+include('../DatabaseConnection.php');
 
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     $name = (!empty($_COOKIE['name_err']) ? $_COOKIE['name_err'] : '');
